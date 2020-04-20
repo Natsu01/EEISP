@@ -14,11 +14,11 @@ columns representing cells.
 ### Example
 1. How to run EEISP  
 ```
-> python eeisp.py filtered_gene_bc_matrices_P10.csv Stem_P10 --threCDI 10.0 --threEEI 10.0　　
+> python eeisp.py filtered_gene_bc_matrices_P10.csv Stem --threCDI 10.0 --threEEI 10.0　　
 
 Option
   * filtered_gene_bc_matrices_P10.csv  　　# An input file forms a comma delimited file (.csv)
-  * Stem_P10          # A file name of run
+  * Stem          # A file name of run
   * --threCDI 10.0    # Set a threshold for CDI(Co-Dependency Index) [1] which users determine
   * --threEEI 10.0    # Set a threshold for EEI which users determine
  ```
@@ -26,10 +26,10 @@ Option
 2. How to convert numbers to Gene Names (Symbols) 
    1. When Ensemble Gene IDs and Gene Names (Symbols) are provided
 ```
-> python gene_name_id.py Stem_P10 genes.tsv Stem_P10_CDI_score_data_thre10.0.txt Stem_P10_number_nonzero_exp.txt 0 10.0
+> python gene_name_id.py Stem genes.tsv Stem_P10_CDI_score_data_thre10.0.txt Stem_P10_number_nonzero_exp.txt 0 10.0
  
 Option
-  * Stem_P10         # A file name of run
+  * Stem         # A file name of run
   * genes.tsv        # A list of numbers, Ensemble Gene IDs and Gene Names (or Symbols), which forms a tab delimited file 
   * Stem_P10_CDI_score_data_thre10.0.txt      # A list of gene pairs with CDI scores
   * Stem_P10_number_nonzero_exp.txt      　　　# A list of genes that show nonzero expression in scRNA-seq data
@@ -39,7 +39,7 @@ Option
 2. 
    2. When only Gene Names (Symbols) is provided 
 ```
-> python gene_name.py Stem_P10 genes.tsv Stem_P10_CDI_score_data_thre10.0.txt Stem_P10_number_nonzero_exp.txt 0 10.0
+> python gene_name.py Stem genes.tsv Stem_P10_CDI_score_data_thre10.0.txt Stem_P10_number_nonzero_exp.txt 0 10.0
 
 Option
   * genes.tsv        # A list of numbers and Gene Names (or Symbols), which forms a tab delimited file 
