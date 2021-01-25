@@ -12,7 +12,7 @@ scRNA-seq data and takes as input a read count matrix data with rows representin
 columns representing cells. 
 
 ### Example
-1. How to run EEISP  
+How to run EEISP  
 `eeisp.sh` performs the calculation of the CDI (Co-Dependency Index)[1] and EEI scores for gene pairs in two steps.  
    1.  `eeisp.py` calculates the CDI and EEI scores for each gene pair. It outputs lists of gene pairs of CDI and EEI, and the tables of degree distribution.     
        `<filename>_CDI_score_data_thre10.0.txt` shows the lists of gene pairs with CDI scores. 
