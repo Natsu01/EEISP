@@ -70,7 +70,7 @@ def calc_degree_CDI(A, threCDI, filename ):
   for i in range(Allgene):
      Count_joint[i] = np.sum(is_nonzeroMat[i] * is_nonzeroMat, axis=1)
   data_file0 = str(filename) + '_joint_nonzero_gene_thre' + str(threCDI) + '.txt'
-  np.savetxt(data_file0, Count_joint, delimiter='\t')
+  #np.savetxt(data_file0, Count_joint, delimiter='\t')
   print ("Count the number of cells that two genes are jointly expressed----")  
 
   return Count_joint, Prob_joint
@@ -88,7 +88,7 @@ def calc_degree_EEI(A, threEEI, filename ):
   for i in range(Allgene):
      Count_excl[i] = np.sum(np.logical_and(is_nonzeroMat[i], is_reverseMat), axis=1)
   data_file0 = str(filename) + '_data_exclusive.txt' 
-  np.savetxt(data_file0, Count_excl, delimiter='\t')
+  #np.savetxt(data_file0, Count_excl, delimiter='\t')
   print ("Count the number of cells that two genes are expressed exclusively----")
 
   # Count the number of cells that have nonzero expression and zero expression
@@ -97,17 +97,16 @@ def calc_degree_EEI(A, threEEI, filename ):
   p_zero = np.sum(A == 0, axis=1) / Allcell
   data_file1 = str(filename) + '_prob_nonzero.txt' 
   data_file2 = str(filename) + '_prob_zero.txt'
-  np.savetxt(data_file1, p_nonzero, delimiter='\t')
-  np.savetxt(data_file2, p_zero, delimiter='\t')
+  #np.savetxt(data_file1, p_nonzero, delimiter='\t')
+  #np.savetxt(data_file2, p_zero, delimiter='\t')
 
   # Initialize a matrix of 'Prob_excl' and compute the probability that 
   # each gene pair exhibits the mutually exclusive expression. 
   Prob_excl = p_nonzero * p_zero[:, np.newaxis]
   data_file3 = str(filename) + '_data_prob_exlusive.txt'
-  np.savetxt(data_file3, Prob_excl, delimiter='\t')
+  #np.savetxt(data_file3, Prob_excl, delimiter='\t')
 
   return Count_excl, Prob_excl
-
 
 
 
@@ -298,8 +297,8 @@ def main():
   Count_excl, Prob_excl = calc_degree_EEI(A, args.threEEI, args.filename )
   degree_cdi, degree_eei = calc_CDI(A, Count_joint, Prob_joint, Count_excl, Prob_excl, args.threCDI, args.threEEI, args.filename)
  
-  
-  print("CDI,EEI次数分布")
+  print("--------------------------------------------------------------")
+  print("Compute CDI and EEI degree distribution.")
   calc_degree_dist(degree_cdi, "CDI_degree_distribution", 0, args.threCDI, args.filename)
   calc_degree_dist(degree_eei, "EEI_degree_distribution", 1, args.threEEI, args.filename)  
   print("Finish to write the CDI and EEI degreee distribution!")
