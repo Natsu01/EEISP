@@ -65,7 +65,7 @@ def generate_EEI(A, tarray, farray, filename):
      Count_excl[i] = np.sum(np.logical_and(is_nonzeroMat[i], is_reverseMat), axis=1)
   print ("Count the number of cells that two genes are expressed exclusively----")
   data_file0 = str(filename) + '_data_exclusive.txt' 
-  np.savetxt(data_file0, Count_excl, delimiter="\t")
+  #np.savetxt(data_file0, Count_excl, delimiter="\t")
 
   # Count the number of cells that have nonzero expression and zero expression 
   # for each gene and compute the probability of them. 
@@ -73,14 +73,14 @@ def generate_EEI(A, tarray, farray, filename):
   p_zero = np.sum(A == 0, axis=1) / Allcell
   data_file1 = str(filename) + '_prob_nonzero.txt' 
   data_file2 = str(filename) + '_prob_zero.txt'
-  np.savetxt(data_file1, p_nonzero, delimiter='\t')
-  np.savetxt(data_file2, p_zero, delimiter='\t')
+  #np.savetxt(data_file1, p_nonzero, delimiter='\t')
+  #np.savetxt(data_file2, p_zero, delimiter='\t')
  
   # Initialize a matrix of 'Prob_excl' and compute the probability that 
   # each gene pair exhibits the mutually exclusive expression. 
   Prob_excl = p_nonzero * p_zero[:, np.newaxis]
   data_file3 = str(filename) + '_data_prob_exlusive.txt'
-  np.savetxt(data_file3, Prob_excl, delimiter='\t')
+  #np.savetxt(data_file3, Prob_excl, delimiter='\t')
 
   total_array = calc_EEI_matrix( Allgene, Allcell, tarray, farray, Count_excl, Prob_excl )
 
