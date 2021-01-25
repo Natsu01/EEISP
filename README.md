@@ -17,7 +17,7 @@ How to run EEISP
    1.  `eeisp.py` calculates the CDI and EEI scores for each gene pair. It outputs lists of gene pairs of CDI and EEI, and the tables of degree distribution.     
        `<filename>_CDI_score_data_thre10.0.txt` shows the lists of gene pairs with CDI scores. 
    2.  `gene_name_id.py`converts to the numbers of CDI and EEI gene pairs to Gene Names (Symbols), if the a list of Ensemble Gene IDs 
-        and Gene Names are provided. When only Gene Names (Symbols) is provided, `gene_name.py` can be performed.  
+        and Gene Names is provided. When only Gene Names (Symbols) is provided, `gene_name.py` can be performed.  
 ```
 > sh eeisp.sh  　
 
