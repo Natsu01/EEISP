@@ -33,7 +33,7 @@ Option
   * <filename>_CDI_score_data_thre10.0.txt      # A list of gene pairs with CDI scores.  
   * <filename>_EEI_score_data_thre10.0.txt      # A list of gene pairs with EEI scores. 
   * <filename>_number_nonzero_exp.txt      　　　# A list of genes that are expressed in more than at least one cell.
-  * 10.0             # A threhsold for CDI (or EEI)
+  * 10.0             # A threhsold for CDI (or EEI).
 
  ```
 ### Reference 
