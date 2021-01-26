@@ -36,5 +36,5 @@ Option
   * 10.0             # A threhsold for CDI (or EEI).
 
  ```
-[](### Reference )
-[]([1] S. Mohammadi, J. D. Velderrain, M. Kellis and A. Grama, "DECODE-ing sparsity patterns in single-cell RNA-seq", bioRxiv, 2018. )
+[](### Reference)
+[]([1] S. Mohammadi, J. D. Velderrain, M. Kellis and A. Grama, "DECODE-ing sparsity patterns in single-cell RNA-seq", bioRxiv, 2018.)
