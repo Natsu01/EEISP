@@ -28,7 +28,10 @@ How to run EEISP
          * <filename>_number_nonzero_exp.txt      　　　# A list of genes that are expressed in more than at least one cell.
          * 10.0             # A threhsold for CDI (or EEI).
        ```
-       
+### Installation
+EEISP is written in Python3 and can run without instllation.  
+
+
 ### Example
 The sample data is included in `sample`. 
    * `data.txt` The input matrix of scRNA-seq data.
