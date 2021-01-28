@@ -29,7 +29,7 @@ How to run EEISP
          * 10.0             # A threhsold for CDI (or EEI).
        ```
 ### Installation
-EEISP is written in Python3 and can run without instllation.  
+EEISP is written in Python3 and does not require an installation.  
 
 
 ### Example
