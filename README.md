@@ -71,5 +71,5 @@ Option
   * 10.0             # A threhsold for CDI (or EEI).
 
  ```--->
-<!--### Reference)
-[]([1] S. Mohammadi, J. D. Velderrain, M. Kellis and A. Grama, "DECODE-ing sparsity patterns in single-cell RNA-seq", bioRxiv, 2018.--->
+### Reference
+Nakajima N., Hayashi T., Fujiki K., Shirahige K., Akiyama T., Akutsu T. and Nakato R., Codependency and mutual exclusivity for gene community detection from   sparse single-cell transcriptome data., bioRxiv, doi: https://doi.org/10.1101/2021.03.15.435370, 2021.
