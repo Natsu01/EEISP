@@ -9,7 +9,6 @@ EEISP is written in Python3 and does not require an installation.
 ## Usage
 EEISP takes a read count matrix data as an input, in which rows and columns represent genes and cells, respectively.  
 
-`eeisp.sh` performs the calculation of the CDI (Co-Dependency Index) and EEI scores for gene pairs in two steps.  
    1.  `eeisp.py` calculates the CDI and EEI scores for each gene pair. It outputs lists of gene pairs of CDI and EEI, and the tables of degree distribution.    
        ```
          * input_file.csv    # An input file forms a comma delimited file (.csv).
@@ -30,6 +29,7 @@ EEISP takes a read count matrix data as an input, in which rows and columns repr
 The sample data is included in `sample`. 
    * `data.txt` The input matrix of scRNA-seq data.
 
+`eeisp.sh` performs the calculation of the CDI (Co-Dependency Index) and EEI scores for gene pairs in two steps.  
 ```
  python3 eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5
  python gene_name_id.py Sample genes.tsv Sample_CDI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.txt Sample_number_nonzero_exp.txt 0.5
