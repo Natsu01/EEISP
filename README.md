@@ -43,22 +43,6 @@ The sample data is included in `sample`.
    Sample_EEI_degree_distribution_thre0.5.csv   # A table of the number of EEI degree and genes.   
    Sample_EEI_convert_data_thre0.5.txt          # A converted file of the EEI score data.  
 ```
-<!--###
-Option
-* eeisp.py
-  * input_file.csv    # An input file forms a comma delimited file (.csv).
-  * filename          # A file name of run.
-  * --threCDI 10.0    # Set a threshold for CDI which users determine.
-  * --threEEI 10.0    # Set a threshold for EEI which users determine.
- 
-* gene_name_id.py 
-  * genes.tsv        # A list of numbers, Ensemble Gene IDs and Gene Names (or Symbols), which forms a tab delimited file. 
-  * <filename>_CDI_score_data_thre10.0.txt      # A list of gene pairs with CDI scores.  
-  * <filename>_EEI_score_data_thre10.0.txt      # A list of gene pairs with EEI scores. 
-  * <filename>_number_nonzero_exp.txt      　　　# A list of genes that are expressed in more than at least one cell.
-  * 10.0             # A threhsold for CDI (or EEI).
 
- ```--->
- 
 ## Reference
 Nakajima N., Hayashi T., Fujiki K., Shirahige K., Akiyama T., Akutsu T. and Nakato R., [Codependency and mutual exclusivity for gene community detection from sparse single-cell transcriptome data](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab601/6324613), *Nucleic Acids Research*, 2021.
