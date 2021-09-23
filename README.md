@@ -35,11 +35,7 @@ The sample data is included in `sample`.
  python gene_name_id.py Sample genes.tsv Sample_CDI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.txt Sample_number_nonzero_exp.txt 0.5
 ```
 
-```
- ## To perform the calculation of CDI and EEI. 
-> sh eeisp.sh 
-```
-  * Output files  
+* Output files  
 ```
    Sample_CDI_score_data_thre0.5.txt            # A list of gene pairs with CDI score.  
    Sample_CDI_degree_distribution_thre0.5.csv   # A table of the number of CDI degree and genes.  
