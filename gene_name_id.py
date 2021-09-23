@@ -7,7 +7,6 @@ import csv
 import math
 import argparse
 
-
 def main():
 
   parser = argparse.ArgumentParser()

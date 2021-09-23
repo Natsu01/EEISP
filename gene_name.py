@@ -6,8 +6,6 @@ import pandas as pd
 import csv
 import argparse
 
-
-
 def main():
 
   parser = argparse.ArgumentParser()
