@@ -1,5 +1,9 @@
-# EEISP computes the score of CDI and EEI from scRNA-seq data
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
+'''
+EEISP computes the score of CDI and EEI from scRNA-seq data
+'''
 
 import numpy as np
 import pandas as pd
