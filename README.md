@@ -66,4 +66,4 @@ Option
  ```--->
  
 ### Reference
-Nakajima N., Hayashi T., Fujiki K., Shirahige K., Akiyama T., Akutsu T. and Nakato R., Codependency and mutual exclusivity for gene community detection from sparse single-cell transcriptome data, Nucleic Acids Research, gkab601, 2021.
+Nakajima N., Hayashi T., Fujiki K., Shirahige K., Akiyama T., Akutsu T. and Nakato R., [Codependency and mutual exclusivity for gene community detection from sparse single-cell transcriptome data](https://academic.oup.com/nar/advance-article/doi/10.1093/nar/gkab601/6324613), *Nucleic Acids Research*, 2021.
