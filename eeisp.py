@@ -157,18 +157,22 @@ def generate_EEImatrix(A, args):
     return EEI
 
 
-def calc_degree(Matrix, thre, ngene, filename, args):
+def calc_degree(Matrix, thre, ngene, filename, output, genenames):
     df = pd.DataFrame(Matrix)
     degree = np.sum(df > thre).tolist()
     df = df[df > thre]
     df = df.stack().reset_index()
     df.columns = ["i", "j", "val"]
-    df = df.sort_values(["i", "val"], ascending=[True, False])
+    df = df[df["i"] < df["j"]]
+    df["gene_i"] = genenames[df["i"]]
+    df["gene_j"] = genenames[df["j"]]
+    df = df.reindex(columns=["i", "j", "gene_i", "gene_j", "val"])
+    df = df.sort_values(["val", "i"], ascending=[False, True])
 
-    data_file2 = args.output + "_" + filename + ".txt"
-    print ("output degree data in " + data_file2)
+    data_file = output + "_" + filename + ".txt"
+    print ("output degree data in " + data_file)
     print ("number of gene pairs over threshold (>" + str(thre) + "): " + str(df.shape[0]))
-    df.to_csv(data_file2, sep="\t", header=False, index=False)
+    df.to_csv(data_file, sep="\t", header=False, index=False)
     return degree
 
 
@@ -208,7 +212,8 @@ def get_nonzero_matrix(input_data, output):
     df["count"] = df[0]
     df[["id","genename","count"]].to_csv(output + '_number_nonzero_exp.txt', sep="\t", index=False, header=False)
 
-    return A
+    genenames = df.index
+    return A, genenames
 
 
 def main():
@@ -235,7 +240,7 @@ def main():
     print("number of cells: ", input_data.shape[1])
     print("number of genes: ", input_data.shape[0])
 
-    A = get_nonzero_matrix(input_data, args.output)
+    A, genenames = get_nonzero_matrix(input_data, args.output)
     ngene = A.shape[0]
     ncell = A.shape[1]
     print("number of nonzero genes: ", ngene)
@@ -243,8 +248,8 @@ def main():
 
     CDI = generate_CDImatrix(A, args)
     EEI = generate_EEImatrix(A, args)
-    DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args)
-    DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args)
+    DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args.output, genenames)
+    DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args.output, genenames)
 
     print("Finish Co-dependency Network!")
     elapsed_time = time.time() - startt
