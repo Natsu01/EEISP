@@ -13,7 +13,7 @@ EEISP requires the following libraries.
 * math
 * multiprocessing
 * time
-* cupy (when using GPU computation `--gpu`)
+* [cupy](https://www.preferred.jp/en/projects/cupy/) (when using GPU computation `--gpu`)
 
 ## Usage
 EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
@@ -55,20 +55,47 @@ The sample data is included in `sample` directory.
    * `genelidlist.txt` is the gene list for `add_genename_from_geneid.py`.
 
 
-```
- eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
- add_genename_from_geneid.py Sample_CDI_score_data_thre0.5.txt Sample_CDI_score_data_thre0.5.addgenename.txt geneidlist.txt
- add_genename_from_geneid.py Sample_EEI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.addgenename.txt geneidlist.txt
-```
+    eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
+This command outputs gene pair lists that have CDI>0.5 or EEI>0.5. `-p 8` means 8 CPUs are used.
 
-* Output files  
+Supply `--gpu` option to GPU computation (require [cupy](https://www.preferred.jp/en/projects/cupy/)):
+
+    eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8 --gpu
+
+Output files are:
 ```
    Sample_CDI_score_data_thre0.5.txt            # A list of gene pairs with CDI score.  
    Sample_CDI_degree_distribution_thre0.5.csv   # A table of the number of CDI degree and genes.  
-   Sample_CDI_score_data_thre0.5.addgenename.txt  # with Gene names
    Sample_EEI_score_data_thre0.5.txt            # A list of gene pairs with EEI scores.  
    Sample_EEI_degree_distribution_thre0.5.csv   # A table of the number of EEI degree and genes.
-   Sample_EEI_score_data_thre0.5.addgenename.txt  # with gene names
+```
+The output files include gene ids only.
+
+```
+   $ head Sample_CDI_score_data_thre0.5.txt
+   2       7       ESG000003       ESG000008       0.96384320244841
+   0       1       ESG000001       ESG000002       0.6852891560232545
+   0       6       ESG000001       ESG000007       0.6852891560232545
+   7       8       ESG000008       ESG000009       0.6852891560232545
+   3       9       ESG000004       ESG000010       0.6469554204484568
+   4       6       ESG100005       ESG000007       0.5258703930217091
+```
+
+Use `add_genename_from_geneid.py` to add gene names using `geneidlist.txt`, which contains the pairs of gene ids and names.
+```
+ add_genename_from_geneid.py Sample_CDI_score_data_thre0.5.txt Sample_CDI_score_data_thre0.5.addgenename.txt geneidlist.txt
+ add_genename_from_geneid.py Sample_EEI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.addgenename.txt geneidlist.txt
+```
+The output files include gene names.
+
+```
+   $ head Sample_CDI_score_data_thre0.5.addgenename.txt
+   2       7       ESG000003       ESG000008       OR4F5   FO538757.3      0.96384320244841
+   0       1       ESG000001       ESG000002       RP11-34P13.3    FAM138A 0.6852891560232545
+   0       6       ESG000001       ESG000007       RP11-34P13.3    RP11-34P13.9    0.6852891560232545
+   7       8       ESG000008       ESG000009       FO538757.3      FO538757.2      0.6852891560232545
+   3       9       ESG000004       ESG000010       RP11-34P13.7    AP006222.2      0.6469554204484568
+   4       6       ESG100005       ESG000007       RP11-34P13.8    RP11-34P13.9    0.5258703930217091
 ```
 
 ## Reference
