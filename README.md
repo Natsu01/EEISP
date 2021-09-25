@@ -49,7 +49,7 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
            --i_id I_ID      column number of gene id (default: 0)
            --i_name I_NAME  column number of gene name (default: 1)
        ```
-### Example
+## Tutorial
 The sample data is included in `sample` directory. 
    * `data.txt` is the input matrix of scRNA-seq data.
    * `genelidlist.txt` is the gene list for `add_genename_from_geneid.py`.
