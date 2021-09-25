@@ -228,7 +228,7 @@ def main():
     parser.add_argument("output", help="Output prefix", type=str)
     parser.add_argument("--threCDI", help="Threshold for CDI (default: 20.0)", type=float, default=20)
     parser.add_argument("--threEEI", help="Threshold for EEI (default: 10.0)", type=float, default=10)
-    parser.add_argument("--tsv", help="Specify when the input file is tab-delimited (tsv)", action="store_true")
+    parser.add_argument("--tsv", help="Specify when the input file is tab-delimited (.tsv)", action="store_true")
     parser.add_argument("--gpu", help="GPU mode", action="store_true")
     parser.add_argument("-p", "--threads", help="number of threads (default: 2)", type=int, default=2)
     parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.2.0')
