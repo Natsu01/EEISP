@@ -5,6 +5,16 @@ EEISP identifies gene pairs that are codependent and mutually exclusive from sin
 ## Installation
 EEISP is written in Python3 and does not require an installation.  
 
+### Dependencies
+EEISP requires the following libraries.
+* numpy
+* pandas
+* scipy
+* math
+* multiprocessing
+* time
+* cupy (when using GPU computation `--gpu`)
+
 ## Usage
 EEISP takes a read count matrix data as an input, in which rows and columns represent genes and cells, respectively.  
 
