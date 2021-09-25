@@ -16,7 +16,7 @@ EEISP requires the following libraries.
 * cupy (when using GPU computation `--gpu`)
 
 ## Usage
-EEISP takes a read count matrix data as an input, in which rows and columns represent genes and cells, respectively.  
+EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
 
    1.  `eeisp.py` calculates the CDI and EEI scores for each gene pair. It outputs lists of gene pairs of CDI and EEI, and the tables of degree distribution.    
        ```
