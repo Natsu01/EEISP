@@ -1,4 +1,4 @@
-###! /usr/bin/env python
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
 '''
@@ -11,7 +11,6 @@ import math
 import sys
 import time
 from math import log
-#import matplotlib.pyplot as plt
 from scipy.stats import binom
 import argparse
 import multiprocessing as mp
@@ -38,19 +37,17 @@ def calcCDI_eachrow(i, ProbArray, CountArray, ngene, ncell):
     del CountArray
     return array
 
-# 各遺伝子ペアで(gi,gj)=(0,1)となるサンプル数がCount_excl[j][i]回以上になるp値(3prob1)と排他性スコアの計算
-# 各遺伝子ペアで(gi,gj)=(1,0)となるサンプル数がCount_excl[i][j]回以上になるp値(prob2)と排他性スコアの計算
-# 便宜的に2つのp値の平均を計算する
+'''
+各遺伝子ペアで(gi,gj)=(0,1)となるサンプル数がCount_excl[j][i]回以上になるp値(3prob1)と排他性スコアの計算
+各遺伝子ペアで(gi,gj)=(1,0)となるサンプル数がCount_excl[i][j]回以上になるp値(prob2)と排他性スコアの計算
+便宜的に2つのp値の平均を計算する
+'''
 def calcEEI_eachrow(i, ProbArray_i, CountArray_i, ProbArray_T_i, CountArray_T_i, ngene, ncell):
     array = np.zeros(ngene)
     for j in range(i + 1, ngene):
- #       x1 = Count_excl[j][i]
-  #      p1 = ProbMatrix[i][j]
         x1 = CountArray_T_i[j]
         p1 = ProbArray_i[j]
         prob1 = binom.sf(x1 - 1, ncell, p1)
-        #      x2 = Count_excl[i][j]
-        #     p2 = ProbMatrix[j][i]
         x2 = CountArray_i[j]
         p2 = ProbArray_T_i[j]
         prob2 = binom.sf(x2 - 1, ncell, p2)
@@ -61,19 +58,17 @@ def calcEEI_eachrow(i, ProbArray_i, CountArray_i, ProbArray_T_i, CountArray_T_i,
         array[j] = val
     return array
 
+
 def genMatrix_MultiProcess(Prob_joint, Count_joint, MatType, ngene, ncell, *, ncore=4):
     context = mp.get_context('spawn')
 
     p = Pool(ncore)
     func_args = []
 
-#    print(MatType, ngene, ncell, ncore)
-
     for i in range(0, ngene):
         if MatType == "CDI":
             func_args.append((calcCDI_eachrow, i, Prob_joint[i], Count_joint[i], ngene, ncell))
         elif MatType == "EEI":
-            #func_args.append((calcEEI_eachrow, i, Prob_joint, Count_joint, ngene, ncell))
             func_args.append((calcEEI_eachrow, i, Prob_joint[i], Count_joint[i], Prob_joint.T[i], Count_joint.T[i], ngene, ncell))
         else:
             print("Error: illegal MatType for genMatrix_MultiProcess.")
@@ -87,18 +82,14 @@ def genMatrix_MultiProcess(Prob_joint, Count_joint, MatType, ngene, ncell, *, nc
 
     return Matrix
 
+
 def generate_CDImatrix(A, args):
     ngene = A.shape[0]
     ncell = A.shape[1]
-    # 各遺伝子ごとにnon-zero値を持つサンプル数をカウントと確率の計算
     is_nonzeroMat = A > 0
     p_nonzero = np.sum(is_nonzeroMat, axis=1) / ncell
-#    plt.plot(np.sort(p_nonzero))
-#    plt.xlabel("Cells")
-#    plt.ylabel("Proportion of nonzero genes")
-#    plt.savefig(args.output + "_p_nonzero.png")
 
-    if(args.gpu):   # cupy
+    if(args.gpu):
         print("using GPU for CDI calculation.")
         import cupy as cp
         p_nonzero = cp.asarray(p_nonzero)
@@ -110,7 +101,7 @@ def generate_CDImatrix(A, args):
 
         Prob_joint = cp.asnumpy(Prob_joint)
         Count_joint = cp.asnumpy(Count_joint)
-    else:      #numpy
+    else:
         print("using CPU for CDI calculation.")
         Prob_joint = p_nonzero * p_nonzero[:, np.newaxis]
         Count_joint = []
@@ -120,7 +111,6 @@ def generate_CDImatrix(A, args):
 
 #    np.savetxt(args.output + "_number_joint_nonzero_gene_thre10.0.txt", Count_joint, delimiter="\t")
 
-#    print("Count_jointly expressed samples----------------------")
     CDI = genMatrix_MultiProcess(Prob_joint, Count_joint, "CDI", ngene, ncell, ncore=args.threads)
 
     return CDI
@@ -162,7 +152,6 @@ def generate_EEImatrix(A, args):
         Count_excl = np.array(Count_excl).reshape(ngene, ngene)
 
 #    np.savetxt(args.output + "_data_exclusive.txt", Count_excl, delimiter="\t")
-#    print("Count_the number of samples which two genes are expressed exclusively----")
 
     EEI = genMatrix_MultiProcess(Prob_joint, Count_excl, "EEI", ngene, ncell, ncore=args.threads)
     return EEI
