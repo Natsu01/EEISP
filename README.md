@@ -54,7 +54,7 @@ The sample data is included in `sample`.
    * `data.txt` is the input matrix of scRNA-seq data.
    * `genelidlist.txt` is the gene list for `add_genename_from_geneid.py`.
 
-`eeisp.sh` performs the calculation of the CDI (Co-Dependency Index) and EEI scores for gene pairs in two steps.  
+
 ```
  eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
  add_genename_from_geneid.py Sample_CDI_score_data_thre0.5.txt Sample_CDI_score_data_thre0.5.addgenename.txt geneidlist.txt
