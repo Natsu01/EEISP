@@ -11,7 +11,6 @@ EEISP requires the following libraries.
 * pandas
 * scipy
 * math
-* multiprocessing
 * time
 * [cupy](https://www.preferred.jp/en/projects/cupy/) (when using GPU computation `--gpu`)
 
