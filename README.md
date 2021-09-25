@@ -10,7 +10,6 @@ EEISP requires the following libraries.
 * numpy
 * pandas
 * scipy
-* math
 * [cupy](https://www.preferred.jp/en/projects/cupy/) (when using GPU computation `--gpu`)
 
 ## Usage
