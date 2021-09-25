@@ -254,8 +254,8 @@ def main():
 
     CDI = generate_CDImatrix(A, args)
     EEI = generate_EEImatrix(A, args)
-    DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre_" + str(args.threCDI), args)
-    DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre_" + str(args.threEEI), args)
+    DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args)
+    DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args)
 
     print("Finish Co-dependency Network!")
     elapsed_time = time.time() - startt
