@@ -18,6 +18,13 @@ EEISP requires the following libraries.
 ## Usage
 EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
 
+   0. (Optional) Convert CellRanger output to an input matrix (require R and [Seurat](https://satijalab.org/seurat/) library)
+       ```
+         datadir="outs/filtered_feature_bc_matrix/"
+         matrix="matrix.txt"
+         R -e "library(Seurat); so <- Read10X('$datadir'); write.table(so, '$matrix', quote=F, sep=',', col.names=T)"
+       ```
+
    1.  `eeisp.py` calculates the CDI and EEI scores for all gene pairs. The output contains lists of gene pairs that have CDI or EEI values above the specified threshold and the tables of degree distribution.
        ```
          usage: eeisp [-h] [--threCDI THRECDI] [--threEEI THREEEI] [--tsv] [--gpu] [-p THREADS] [-v] matrix output
