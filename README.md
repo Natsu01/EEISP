@@ -18,20 +18,30 @@ EEISP requires the following libraries.
 ## Usage
 EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
 
-   1.  `eeisp.py` calculates the CDI and EEI scores for each gene pair. It outputs lists of gene pairs of CDI and EEI, and the tables of degree distribution.    
+   1.  `eeisp.py` calculates the CDI and EEI scores for all gene pairs. The output contains lists of gene pairs that have CDI or EEI values above the specified threshold and the tables of degree distribution.
        ```
-         * input_file.csv    # An input file forms a comma delimited file (.csv).
-         * filename          # A filename
-         * --threCDI <float> # Threshold for CDI
-         * --threEEI <float> # Threshold for EEI
+         usage: eeisp [-h] [--threCDI THRECDI] [--threEEI THREEEI] [--tsv] [--gpu] [-p THREADS] [-v] matrix output
+
+         positional arguments:
+           matrix                Input matrix
+           output                Output prefix
+
+         optional arguments:
+           -h, --help            show this help message and exit
+           --threCDI THRECDI     Threshold for CDI (default: 20.0)
+           --threEEI THREEEI     Threshold for EEI (default: 10.0)
+           --tsv                 Specify when the input file is tab-delimited (.tsv)
+           --gpu                 GPU mode
+           -p THREADS, --threads THREADS  number of threads (default: 2)
+           -v, --version         show program's version number and exit
        ```  
    2.  `gene_name_id.py`converts to the numbers of CDI and EEI gene pairs to Gene Names (Symbols), if the a list of Ensemble Gene IDs 
         and Gene Names is provided. When only Gene Names (Symbols) is provided, `gene_name.py` can be performed.  
         ```
          * genes.tsv        # A list of numbers, Ensemble Gene IDs and Gene Names (or Symbols), which forms a tab delimited file. 
-         * <filename>_CDI_score_data_thre10.0.txt      # A list of gene pairs with CDI scores.  
-         * <filename>_EEI_score_data_thre10.0.txt      # A list of gene pairs with EEI scores. 
-         * <filename>_number_nonzero_exp.txt      　　　# A list of genes that are expressed in more than at least one cell.
+         * <output>_CDI_score_data_thre<threCDI>.txt      # A list of gene pairs with CDI scores.  
+         * <output>_EEI_score_data_thre<threCDI>.txt      # A list of gene pairs with EEI scores. 
+         * <output>_number_nonzero_exp.txt      　　　# A list of genes that are expressed in more than at least one cell.
          * 10.0             # A threhsold for CDI (or EEI).
        ```
 ### Example
@@ -40,7 +50,7 @@ The sample data is included in `sample`.
 
 `eeisp.sh` performs the calculation of the CDI (Co-Dependency Index) and EEI scores for gene pairs in two steps.  
 ```
- python eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5
+ python eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
  python gene_name_id.py Sample genes.tsv Sample_CDI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.txt Sample_number_nonzero_exp.txt 0.5
 ```
 
