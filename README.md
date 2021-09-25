@@ -35,33 +35,40 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
            -p THREADS, --threads THREADS  number of threads (default: 2)
            -v, --version         show program's version number and exit
        ```  
-   2.  `gene_name_id.py`converts to the numbers of CDI and EEI gene pairs to Gene Names (Symbols), if the a list of Ensemble Gene IDs 
-        and Gene Names is provided. When only Gene Names (Symbols) is provided, `gene_name.py` can be performed.  
+   2.  `add_genename_from_geneid.py` add Gene Names (Symbols) to the output files of `eeisp.py`.
         ```
-         * genes.tsv        # A list of numbers, Ensemble Gene IDs and Gene Names (or Symbols), which forms a tab delimited file. 
-         * <output>_CDI_score_data_thre<threCDI>.txt      # A list of gene pairs with CDI scores.  
-         * <output>_EEI_score_data_thre<threCDI>.txt      # A list of gene pairs with EEI scores. 
-         * <output>_number_nonzero_exp.txt      　　　# A list of genes that are expressed in more than at least one cell.
-         * 10.0             # A threhsold for CDI (or EEI).
+         usage: add_genename_from_geneid.py [-h] [--i_id I_ID] [--i_name I_NAME] input output genelist
+
+         positional arguments:
+           input            Input matrix
+           output           Output prefix
+           genelist         Gene list
+
+         optional arguments:
+           -h, --help       show this help message and exit
+           --i_id I_ID      column number of gene id (default: 0)
+           --i_name I_NAME  column number of gene name (default: 1)
        ```
 ### Example
 The sample data is included in `sample`. 
-   * `data.txt` The input matrix of scRNA-seq data.
+   * `data.txt` is the input matrix of scRNA-seq data.
+   * `genelidlist.txt` is the gene list for `add_genename_from_geneid.py`.
 
 `eeisp.sh` performs the calculation of the CDI (Co-Dependency Index) and EEI scores for gene pairs in two steps.  
 ```
- python eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
- python gene_name_id.py Sample genes.tsv Sample_CDI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.txt Sample_number_nonzero_exp.txt 0.5
+ eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
+ add_genename_from_geneid.py Sample_CDI_score_data_thre0.5.txt Sample_CDI_score_data_thre0.5.addgenename.txt geneidlist.txt
+ add_genename_from_geneid.py Sample_EEI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.addgenename.txt geneidlist.txt
 ```
 
 * Output files  
 ```
    Sample_CDI_score_data_thre0.5.txt            # A list of gene pairs with CDI score.  
    Sample_CDI_degree_distribution_thre0.5.csv   # A table of the number of CDI degree and genes.  
-   Sample_CDI_convert_data_thre0.5.txt          # A converted file of the CDI score data.  
+   Sample_CDI_score_data_thre0.5.addgenename.txt  # with Gene names
    Sample_EEI_score_data_thre0.5.txt            # A list of gene pairs with EEI scores.  
-   Sample_EEI_degree_distribution_thre0.5.csv   # A table of the number of EEI degree and genes.   
-   Sample_EEI_convert_data_thre0.5.txt          # A converted file of the EEI score data.  
+   Sample_EEI_degree_distribution_thre0.5.csv   # A table of the number of EEI degree and genes.
+   Sample_EEI_score_data_thre0.5.addgenename.txt  # with gene names
 ```
 
 ## Reference
