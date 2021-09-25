@@ -225,7 +225,7 @@ def main():
     parser.add_argument("--tsv", help="Specify when the input file is tab-delimited (.tsv)", action="store_true")
     parser.add_argument("--gpu", help="GPU mode", action="store_true")
     parser.add_argument("-p", "--threads", help="number of threads (default: 2)", type=int, default=2)
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.2.1')
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.0')
 
     args = parser.parse_args()
     print(args)
