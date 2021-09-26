@@ -69,6 +69,8 @@ This command outputs gene pair lists that have CDI>0.5 or EEI>0.5. `-p 8` means 
 Supply `--gpu` option to GPU computation (require [cupy](https://www.preferred.jp/en/projects/cupy/)):
 
     eeisp data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8 --gpu
+    
+(Note: Since GPU computation covers a part of eeisp, it is better to use multiple CPUs even in `--gpu` mode for the fast computation.)
 
 Output files are:
 ```
