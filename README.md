@@ -3,14 +3,18 @@
 EEISP identifies gene pairs that are codependent and mutually exclusive from single-cell RNA-seq data. 
        
 ## Installation
-EEISP is written in Python3 and does not require an installation.  
 
-### Dependencies
-EEISP requires the following libraries.
-* numpy
-* pandas
-* scipy
-* [cupy](https://www.preferred.jp/en/projects/cupy/) (when using GPU computation `--gpu`)
+    pip install eeisp
+
+###  (Optional) Dependencies for GPU
+EEISP requires [cupy](https://cupy.dev/) when using GPU computation `--gpu`. Use pip to install cupy like this (see [the manual](https://docs.cupy.dev/en/stable/install.html) for more detail).
+
+    # For CUDA 9.2
+    pip install cupy-cuda92
+    # For CUDA 10.1
+    pip install cupy-cuda101
+
+If you do not use `--gpu`, you do not need to install cupy.
 
 ## Usage
 EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
@@ -22,7 +26,7 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
          R -e "library(Seurat); so <- Read10X('$datadir'); write.table(so, '$matrix', quote=F, sep=',', col.names=T)"
        ```
 
-   1.  `eeisp.py` calculates the CDI and EEI scores for all gene pairs. The output contains lists of gene pairs that have CDI or EEI values above the specified threshold and the tables of degree distribution.
+   1.  `eeisp` calculates the CDI and EEI scores for all gene pairs. The output contains lists of gene pairs that have CDI or EEI values above the specified threshold and the tables of degree distribution.
        ```
          usage: eeisp [-h] [--threCDI THRECDI] [--threEEI THREEEI] [--tsv] [--gpu] [-p THREADS] [-v] matrix output
 
@@ -39,9 +43,9 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
            -p THREADS, --threads THREADS  number of threads (default: 2)
            -v, --version         show program's version number and exit
        ```  
-   2.  `add_genename_from_geneid.py` add Gene Names (Symbols) to the output files of `eeisp.py`.
+   2.  `eeisp_add_genename_from_geneid` add Gene Names (Symbols) to the output files of `eeisp`.
         ```
-         usage: add_genename_from_geneid.py [-h] [--i_id I_ID] [--i_name I_NAME] input output genelist
+         usage: eeisp_add_genename_from_geneid [-h] [--i_id I_ID] [--i_name I_NAME] input output genelist
 
          positional arguments:
            input            Input matrix
@@ -56,15 +60,15 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
 ## Tutorial
 The sample data is included in `sample` directory. 
    * `data.txt` is the input matrix of scRNA-seq data.
-   * `genelidlist.txt` is the gene list for `add_genename_from_geneid.py`.
+   * `genelidlist.txt` is the gene list for `eeisp_add_genename_from_geneid`.
 
 
-    eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
+    eeisp data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
 This command outputs gene pair lists that have CDI>0.5 or EEI>0.5. `-p 8` means 8 CPUs are used.
 
 Supply `--gpu` option to GPU computation (require [cupy](https://www.preferred.jp/en/projects/cupy/)):
 
-    eeisp.py data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8 --gpu
+    eeisp data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8 --gpu
 
 Output files are:
 ```
@@ -85,10 +89,16 @@ The output files include gene ids only.
    4       6       ESG100005       ESG000007       0.5258703930217091
 ```
 
-Use `add_genename_from_geneid.py` to add gene names using `geneidlist.txt`, which contains the pairs of gene ids and names.
+Use `eeisp_add_genename_from_geneid` to add gene names using `geneidlist.txt`, which contains the pairs of gene ids and names.
 ```
- add_genename_from_geneid.py Sample_CDI_score_data_thre0.5.txt Sample_CDI_score_data_thre0.5.addgenename.txt geneidlist.txt
- add_genename_from_geneid.py Sample_EEI_score_data_thre0.5.txt Sample_EEI_score_data_thre0.5.addgenename.txt geneidlist.txt
+ eeisp_add_genename_from_geneid \
+     Sample_CDI_score_data_thre0.5.txt \
+     Sample_CDI_score_data_thre0.5.addgenename.txt \
+     geneidlist.txt
+ eeisp_add_genename_from_geneid \
+     Sample_EEI_score_data_thre0.5.txt \
+     Sample_EEI_score_data_thre0.5.addgenename.txt \
+     geneidlist.txt
 ```
 The output files include gene names.
 
