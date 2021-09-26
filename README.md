@@ -59,8 +59,8 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
        ```
 ## Tutorial
 The sample data is included in `sample` directory. 
-   * `data.txt` is the input matrix of scRNA-seq data.
-   * `genelidlist.txt` is the gene list for `eeisp_add_genename_from_geneid`.
+   * `data.txt`: the input matrix of scRNA-seq data.
+   * `genelidlist.txt`: the gene list for `eeisp_add_genename_from_geneid`.
 
 
     eeisp data.txt Sample --threCDI 0.5 --threEEI 0.5 -p 8
