@@ -17,7 +17,7 @@ EEISP requires [cupy](https://cupy.dev/) when using GPU computation `--gpu`. Use
 If you do not use `--gpu`, you do not need to install cupy.
 
 ## Usage
-EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
+EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively. A gzipped file (.gz) is also acceptable.
 
    0. (Optional) Convert CellRanger output to an input matrix (require R and [Seurat](https://satijalab.org/seurat/) library)
        ```
