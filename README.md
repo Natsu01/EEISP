@@ -17,7 +17,7 @@ EEISP requires [cupy](https://cupy.dev/) when using GPU computation `--gpu`. Use
 If you do not use `--gpu`, you do not need to install cupy.
 
 ## Usage
-EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively.  
+EEISP takes a read count matrix as an input, in which rows and columns represent genes and cells, respectively. A gzipped file (.gz) is also acceptable.
 
    0. (Optional) Convert CellRanger output to an input matrix (require R and [Seurat](https://satijalab.org/seurat/) library)
        ```
@@ -43,7 +43,7 @@ EEISP takes a read count matrix as an input, in which rows and columns represent
            -p THREADS, --threads THREADS  number of threads (default: 2)
            -v, --version         show program's version number and exit
        ```  
-   2.  `eeisp_add_genename_from_geneid` add Gene Names (Symbols) to the output files of `eeisp`.
+   2. `eeisp_add_genename_from_geneid` add Gene Names (Symbols) to the output files of `eeisp`.
         ```
          usage: eeisp_add_genename_from_geneid [-h] [--i_id I_ID] [--i_name I_NAME] input output genelist
 
@@ -79,7 +79,7 @@ Output files are:
    Sample_EEI_score_data_thre0.5.txt            # A list of gene pairs with EEI scores.  
    Sample_EEI_degree_distribution_thre0.5.csv   # A table of the number of EEI degree and genes.
 ```
-The output files include gene ids only.
+The output files might include gene ids only. 
 
 ```
    $ head Sample_CDI_score_data_thre0.5.txt
@@ -91,7 +91,8 @@ The output files include gene ids only.
    4       6       ESG100005       ESG000007       0.5258703930217091
 ```
 
-Use `eeisp_add_genename_from_geneid` to add gene names using `geneidlist.txt`, which contains the pairs of gene ids and names.
+If you want to add gene names (Symbols), use `eeisp_add_genename_from_geneid` with `geneidlist.txt`, which contains the pairs of gene ids and names.
+
 ```
  eeisp_add_genename_from_geneid \
      Sample_CDI_score_data_thre0.5.txt \
@@ -102,6 +103,7 @@ Use `eeisp_add_genename_from_geneid` to add gene names using `geneidlist.txt`, w
      Sample_EEI_score_data_thre0.5.addgenename.txt \
      geneidlist.txt
 ```
+
 The output files include gene names.
 
 ```
