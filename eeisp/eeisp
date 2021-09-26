@@ -7,14 +7,12 @@ EEISP computes the score of CDI and EEI from scRNA-seq data
 
 import numpy as np
 import pandas as pd
-import math
 import sys
 import time
-from math import log
 from scipy.stats import binom
 import argparse
 import multiprocessing as mp
-from multiprocessing import Pool
+import gc
 
 def argwrapper(args):
     return args[0](*args[1:])
@@ -30,7 +28,7 @@ def calcCDI_eachrow(i, ProbArray, CountArray, ngene, ncell):
         if prob <= 0:
             val = -10000000.0
         else:
-            val = -(math.log10(prob))
+            val = -(np.log10(prob))
         array[j] = val
 
     del ProbArray
@@ -54,15 +52,13 @@ def calcEEI_eachrow(i, ProbArray_i, CountArray_i, ProbArray_T_i, CountArray_T_i,
         if prob1 <= 0 or prob2 <= 0:
             val = -10000000.0
         else:
-            val = ((-(math.log10(prob1))) + (-(math.log10(prob2)))) / 2
+            val = ((-(np.log10(prob1))) + (-(np.log10(prob2)))) / 2
         array[j] = val
     return array
 
 
 def genMatrix_MultiProcess(Prob_joint, Count_joint, MatType, ngene, ncell, *, ncore=4):
-    context = mp.get_context('spawn')
-
-    p = Pool(ncore)
+    p = mp.get_context('spawn').Pool(ncore)
     func_args = []
 
     for i in range(0, ngene):
@@ -109,8 +105,6 @@ def generate_CDImatrix(A, args):
             Count_joint.extend(np.sum(row * is_nonzeroMat, axis=1))
         Count_joint = np.array(Count_joint).reshape(ngene, ngene)
 
-#    np.savetxt(args.output + "_number_joint_nonzero_gene_thre10.0.txt", Count_joint, delimiter="\t")
-
     CDI = genMatrix_MultiProcess(Prob_joint, Count_joint, "CDI", ngene, ncell, ncore=args.threads)
 
     return CDI
@@ -121,8 +115,6 @@ def generate_EEImatrix(A, args):
     is_nonzeroMat = A > 0
     p_nonzero = np.sum(is_nonzeroMat, axis=1) / ncell
     p_zero = np.sum(A == 0, axis=1) / ncell
-#    np.savetxt(args.output + "_prob_nonzero.txt", p_nonzero, delimiter="\t")
-#    np.savetxt(args.output + "_prob_zero.txt", p_zero, delimiter="\t")
 
     if(args.gpu):
         print("using GPU for EEI calculation.")
@@ -150,8 +142,6 @@ def generate_EEImatrix(A, args):
             # Aと(NOT A)の転置行列をかけた行列の、各要素のサンプル数をカウント
             Count_excl.extend(np.sum(np.logical_and(row, notA), axis=1))
         Count_excl = np.array(Count_excl).reshape(ngene, ngene)
-
-#    np.savetxt(args.output + "_data_exclusive.txt", Count_excl, delimiter="\t")
 
     EEI = genMatrix_MultiProcess(Prob_joint, Count_excl, "EEI", ngene, ncell, ncore=args.threads)
     return EEI
@@ -207,10 +197,10 @@ def get_nonzero_matrix(input_data, output):
 
     ncell_exp = np.sum(input_data > 0, axis=1)
     df = pd.DataFrame(ncell_exp[ncell_exp>0])
-    df["id"] = range(df.shape[0])
-    df["genename"] = df.index
-    df["count"] = df[0]
-    df[["id","genename","count"]].to_csv(output + '_number_nonzero_exp.txt', sep="\t", index=False, header=False)
+#    df["id"] = range(df.shape[0])
+#    df["genename"] = df.index
+#    df["count"] = df[0]
+#    df[["id","genename","count"]].to_csv(output + '_number_nonzero_exp.txt', sep="\t", index=False, header=False)
 
     genenames = df.index
     return A, genenames
@@ -220,10 +210,12 @@ def main():
     parser = argparse.ArgumentParser(prog='eeisp')
     parser.add_argument("matrix", help="Input matrix", type=str)
     parser.add_argument("output", help="Output prefix", type=str)
-    parser.add_argument("--threCDI", help="Threshold for CDI (default: 20.0)", type=float, default=20)
-    parser.add_argument("--threEEI", help="Threshold for EEI (default: 10.0)", type=float, default=10)
+    parser.add_argument("--threCDI", help="Threshold for CDI (default: 10.0)", type=float, default=10)
+    parser.add_argument("--threEEI", help="Threshold for EEI (default: 5.0)", type=float, default=5)
     parser.add_argument("--tsv", help="Specify when the input file is tab-delimited (.tsv)", action="store_true")
     parser.add_argument("--gpu", help="GPU mode", action="store_true")
+    parser.add_argument("--CDIonly", help="Calculate CDI only", action="store_true")
+    parser.add_argument("--EEIonly", help="Calculate EEI only", action="store_true")
     parser.add_argument("-p", "--threads", help="number of threads (default: 2)", type=int, default=2)
     parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.0')
 
@@ -241,26 +233,32 @@ def main():
     print("number of genes: ", input_data.shape[0])
 
     A, genenames = get_nonzero_matrix(input_data, args.output)
+    del input_data
+    gc.collect()
+
     ngene = A.shape[0]
     ncell = A.shape[1]
     print("number of nonzero genes: ", ngene)
     print ("-----------------------------------------------")
 
-    CDI = generate_CDImatrix(A, args)
-    EEI = generate_EEImatrix(A, args)
-    DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args.output, genenames)
-    DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args.output, genenames)
+    if not (args.EEIonly):
+        CDI = generate_CDImatrix(A, args)
+        DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args.output, genenames)
+        calc_degree_dist(DEGREE_CDI, "CDI", args)
+        del CDI, DEGREE_CDI
+        gc.collect()
+        print("Finish to calculate CDI!")
 
-    print("Finish Co-dependency Network!")
+    if not (args.CDIonly):
+        EEI = generate_EEImatrix(A, args)
+        DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args.output, genenames)
+        calc_degree_dist(DEGREE_EEI, "EEI", args)
+
+        print("Finish to calculate EEI!")
+
     elapsed_time = time.time() - startt
     print("Elapsed_time:{0}".format(elapsed_time) + "[sec]")
     print("*************************************************************")
-
-    # CDI, EEIの次数分布
-    calc_degree_dist(DEGREE_CDI, "CDI", args)
-    calc_degree_dist(DEGREE_EEI, "EEI", args)
-
-    print("Finish to write the CDI and EEI degreee distribution!")
 
 
 if __name__ == "__main__":
