@@ -10,9 +10,9 @@ EEISP identifies gene pairs that are codependent and mutually exclusive from sin
 EEISP requires [cupy](https://cupy.dev/) when using GPU computation `--gpu`. Use pip to install cupy like this (see [the manual](https://docs.cupy.dev/en/stable/install.html) for more detail).
 
     # For CUDA 9.2
-    pip install cupy-cuda92
+    pip3 install cupy-cuda92
     # For CUDA 10.1
-    pip install cupy-cuda101
+    pip3 install cupy-cuda101
 
 If you do not use `--gpu`, you do not need to install cupy.
 
