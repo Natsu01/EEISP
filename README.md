@@ -4,7 +4,7 @@ EEISP identifies gene pairs that are codependent and mutually exclusive from sin
        
 ## Installation
 
-    pip install eeisp
+    pip3 install eeisp
 
 ###  (Optional) Dependencies for GPU
 EEISP requires [cupy](https://cupy.dev/) when using GPU computation `--gpu`. Use pip to install cupy like this (see [the manual](https://docs.cupy.dev/en/stable/install.html) for more detail).
