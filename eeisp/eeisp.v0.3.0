@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+
 '''
-EEISP: identify gene pairs that are codependent and mutually exclusive from single-cell RNA-seq data.
-Copyright(c)  Ryuichiro Nakato <rnakato@iqb.u-tokyo.ac.jp>
-All rights reserved.
+EEISP computes the score of CDI and EEI from scRNA-seq data
 '''
 
 import numpy as np
@@ -37,7 +36,7 @@ def calcCDI_eachrow(i, ProbArray, CountArray, ngene, ncell):
     return array
 
 '''
-各遺伝子ペアで(gi,gj)=(0,1)となるサンプル数がCount_excl[j][i]回以上になるp値(prob1)と排他性スコアの計算
+各遺伝子ペアで(gi,gj)=(0,1)となるサンプル数がCount_excl[j][i]回以上になるp値(3prob1)と排他性スコアの計算
 各遺伝子ペアで(gi,gj)=(1,0)となるサンプル数がCount_excl[i][j]回以上になるp値(prob2)と排他性スコアの計算
 便宜的に2つのp値の平均を計算する
 '''
@@ -56,6 +55,7 @@ def calcEEI_eachrow(i, ProbArray_i, CountArray_i, ProbArray_T_i, CountArray_T_i,
             val = ((-(np.log10(prob1))) + (-(np.log10(prob2)))) / 2
         array[j] = val
     return array
+
 
 def genMatrix_MultiProcess(Prob_joint, Count_joint, MatType, ngene, ncell, *, ncore=4):
     p = mp.get_context('spawn').Pool(ncore)
@@ -78,8 +78,6 @@ def genMatrix_MultiProcess(Prob_joint, Count_joint, MatType, ngene, ncell, *, nc
 
     return Matrix
 
-def count_sum_nonzeroMat(i, is_nonzeroMat):
-    return np.sum(is_nonzeroMat[i,:] * is_nonzeroMat, axis=1)
 
 def generate_CDImatrix(A, args):
     ngene = A.shape[0]
@@ -92,8 +90,8 @@ def generate_CDImatrix(A, args):
         import cupy as cp
         p_nonzero = cp.asarray(p_nonzero)
         is_nonzeroMat = cp.asarray(is_nonzeroMat)
-        Prob_joint = cp.array(p_nonzero * p_nonzero[:, cp.newaxis], dtype='float32')
-        Count_joint = cp.zeros((ngene, ngene), dtype='uint16')
+        Prob_joint = p_nonzero * p_nonzero[:, cp.newaxis]
+        Count_joint = cp.zeros((ngene, ngene), dtype=cp.int64)
         for i in range(ngene):
             Count_joint[i] = cp.sum(is_nonzeroMat[i] * is_nonzeroMat, axis=1)
 
@@ -101,25 +99,15 @@ def generate_CDImatrix(A, args):
         Count_joint = cp.asnumpy(Count_joint)
     else:
         print("using CPU for CDI calculation.")
-        Prob_joint = np.array(p_nonzero * p_nonzero[:, np.newaxis], dtype='float32')
-        Count_joint = np.zeros((ngene,ngene), dtype='uint16')
-
-        p = mp.get_context('spawn').Pool(args.threads)
-        func_args = []
-
-        for i in range(ngene):
-            func_args.append((count_sum_nonzeroMat, i, is_nonzeroMat))
-
-        Count_joint = p.map(argwrapper, func_args)
-        p.close()
+        Prob_joint = p_nonzero * p_nonzero[:, np.newaxis]
+        Count_joint = []
+        for row in is_nonzeroMat:
+            Count_joint.extend(np.sum(row * is_nonzeroMat, axis=1))
+        Count_joint = np.array(Count_joint).reshape(ngene, ngene)
 
     CDI = genMatrix_MultiProcess(Prob_joint, Count_joint, "CDI", ngene, ncell, ncore=args.threads)
 
     return CDI
-
-def count_sum_nonzeroMatnotA(i, is_nonzeroMat, notA):
-#    return np.sum(np.logical_and(is_nonzeroMat[i,:], notA), axis=1)
-    return np.sum(is_nonzeroMat[i,:] * notA, axis=1)
 
 def generate_EEImatrix(A, args):
     ngene = A.shape[0]
@@ -136,29 +124,25 @@ def generate_EEImatrix(A, args):
         is_nonzeroMat = cp.asarray(is_nonzeroMat)
         notA = cp.asarray(np.logical_not(A))
 
-        Prob_joint = cp.array(p_nonzero * p_zero[:, np.newaxis], dtype='float32')
-        Count_excl = cp.zeros((ngene, ngene), dtype='uint16')
+        Prob_joint = p_nonzero * p_zero[:, np.newaxis]
+        Count_excl = cp.zeros((ngene, ngene), dtype=np.int64)
         for i in range(ngene):
-            Count_excl[i] = cp.sum(is_nonzeroMat[i] * notA, axis=1)
+            Count_excl[i] = cp.sum(cp.logical_and(is_nonzeroMat[i], notA), axis=1)
 
         Prob_joint = cp.asnumpy(Prob_joint)
         Count_excl = cp.asnumpy(Count_excl)
     else:
         print("using CPU for EEI calculation.")
-        Prob_joint = np.array(p_nonzero * p_zero[:, np.newaxis], dtype='float32')
+        # 各遺伝子ペアで排他的発現をする確率の初期化と確率計算
+        Prob_joint = p_nonzero * p_zero[:, np.newaxis]
+        # 1回の行列演算で排他的発現(g1,g2)=(1,0) と(g2,g1)=(1,0)=(g1,g2)=(0,1)を持つサンプル数をカウント
         notA = np.logical_not(A)
-        Count_excl = np.zeros((ngene,ngene), dtype='uint16')
+        Count_excl = []
+        for row in is_nonzeroMat:
+            # Aと(NOT A)の転置行列をかけた行列の、各要素のサンプル数をカウント
+            Count_excl.extend(np.sum(np.logical_and(row, notA), axis=1))
+        Count_excl = np.array(Count_excl).reshape(ngene, ngene)
 
-        p = mp.get_context('spawn').Pool(args.threads)
-        func_args = []
-
-        for i in range(ngene):
-            func_args.append((count_sum_nonzeroMatnotA, i, is_nonzeroMat, notA))
-
-        Count_excl = np.array(p.map(argwrapper, func_args), dtype='uint16')
-        p.close()
-
-    del notA
     EEI = genMatrix_MultiProcess(Prob_joint, Count_excl, "EEI", ngene, ncell, ncore=args.threads)
     return EEI
 
@@ -206,16 +190,21 @@ def calc_degree_dist(degree, filename, args):
     merge = pd.concat([log_df, df], axis=1)
     merge.to_csv(args.output + "_" + filename + "_degree_distribution.tsv", sep="\t")
 
-def get_nonzero_matrix(input_data):
+
+def get_nonzero_matrix(input_data, output):
     A = np.array(input_data)
     A = A[np.any(A > 0, axis=1)]
 
     ncell_exp = np.sum(input_data > 0, axis=1)
     df = pd.DataFrame(ncell_exp[ncell_exp>0])
+#    df["id"] = range(df.shape[0])
+#    df["genename"] = df.index
+#    df["count"] = df[0]
+#    df[["id","genename","count"]].to_csv(output + '_number_nonzero_exp.txt', sep="\t", index=False, header=False)
 
     genenames = df.index
-    del df
     return A, genenames
+
 
 def main():
     parser = argparse.ArgumentParser(prog='eeisp')
@@ -228,7 +217,7 @@ def main():
     parser.add_argument("--CDIonly", help="Calculate CDI only", action="store_true")
     parser.add_argument("--EEIonly", help="Calculate EEI only", action="store_true")
     parser.add_argument("-p", "--threads", help="number of threads (default: 2)", type=int, default=2)
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.1')
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.3.0')
 
     args = parser.parse_args()
     print(args)
@@ -243,7 +232,7 @@ def main():
     print("number of cells: ", input_data.shape[1])
     print("number of genes: ", input_data.shape[0])
 
-    A, genenames = get_nonzero_matrix(input_data)
+    A, genenames = get_nonzero_matrix(input_data, args.output)
     del input_data
     gc.collect()
 
@@ -253,22 +242,17 @@ def main():
     print ("-----------------------------------------------")
 
     if not (args.EEIonly):
-        cdi = generate_CDImatrix(A, args)
-        degree_cdi = calc_degree(cdi, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args.output, genenames)
-        calc_degree_dist(degree_cdi, "CDI", args)
-        del cdi, degree_cdi
+        CDI = generate_CDImatrix(A, args)
+        DEGREE_CDI = calc_degree(CDI, args.threCDI, ngene, "CDI_score_data_thre" + str(args.threCDI), args.output, genenames)
+        calc_degree_dist(DEGREE_CDI, "CDI", args)
+        del CDI, DEGREE_CDI
         gc.collect()
         print("Finish to calculate CDI!")
 
     if not (args.CDIonly):
-        eei = generate_EEImatrix(A, args)
-
-        del A
-
-        degree_eei = calc_degree(eei, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args.output, genenames)
-        calc_degree_dist(degree_eei, "EEI", args)
-        del eei, degree_eei
-        gc.collect()
+        EEI = generate_EEImatrix(A, args)
+        DEGREE_EEI = calc_degree(EEI, args.threEEI, ngene, "EEI_score_data_thre" + str(args.threEEI), args.output, genenames)
+        calc_degree_dist(DEGREE_EEI, "EEI", args)
 
         print("Finish to calculate EEI!")
 
