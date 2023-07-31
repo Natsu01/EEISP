@@ -5,14 +5,16 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="eeisp",
-    version="0.5.0",
+    version="0.6.0", # for test
+#    version="0.5.0",
     license="GPL3.0",
     install_requires=[
         "numpy>=1.14.2",
         "pandas>=0.22.0",
-        "scipy>=1.3"
+        "scipy>=1.3",
+        "networkx"
     ],
-    author="Natsu Nakajima, Ryuichiro Nakato",
+    author="Ryuichiro Nakato",
     author_email="rnakato@iqb.u-tokyo.ac.jp",
     description="Identify gene pairs that are codependent and mutually exclusive from single-cell RNA-seq data.",
     long_description=long_description,
