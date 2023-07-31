@@ -9,7 +9,6 @@ All rights reserved.
 import numpy as np
 import pandas as pd
 import sys
-import os
 import time
 from scipy.stats import binom
 import argparse
@@ -20,11 +19,18 @@ def argwrapper(args):
     return args[0](*args[1:])
 
 def calcCDI_eachrow(i, ProbArray, CountArray, ngene, ncell):
-    x = CountArray[i + 1:]
-    p = ProbArray[i + 1:]
-    prob = binom.sf(x - 1, ncell, p)
-    val = np.where(prob <= 0, -10000000.0, -(np.log10(prob)))
-    array = np.pad(val, (i + 1, 0), mode='constant', constant_values=0)
+    array = np.zeros(ngene)
+    for j in range(i + 1, ngene):
+        x = CountArray[j]
+        p = ProbArray[j]
+        # 生存関数 binom.sfを使う
+         # xが入っていないのでx-1に気をつけること
+        prob = binom.sf(x - 1, ncell, p)
+        if prob <= 0:
+            val = -10000000.0
+        else:
+            val = -(np.log10(prob))
+        array[j] = val
 
     del ProbArray
     del CountArray
@@ -36,16 +42,19 @@ def calcCDI_eachrow(i, ProbArray, CountArray, ngene, ncell):
 便宜的に2つのp値の平均を計算する
 '''
 def calcEEI_eachrow(i, ProbArray_i, CountArray_i, ProbArray_T_i, CountArray_T_i, ngene, ncell):
-    x1 = CountArray_T_i[i + 1:]
-    p1 = ProbArray_i[i + 1:]
-    prob1 = binom.sf(x1 - 1, ncell, p1)
-
-    x2 = CountArray_i[i + 1:]
-    p2 = ProbArray_T_i[i + 1:]
-    prob2 = binom.sf(x2 - 1, ncell, p2)
-
-    val = np.where((prob1 <= 0) | (prob2 <= 0), -10000000.0, (-(np.log10(prob1)) + (-(np.log10(prob2)))) / 2)
-    array = np.pad(val, (i + 1, 0), mode='constant', constant_values=0)
+    array = np.zeros(ngene)
+    for j in range(i + 1, ngene):
+        x1 = CountArray_T_i[j]
+        p1 = ProbArray_i[j]
+        prob1 = binom.sf(x1 - 1, ncell, p1)
+        x2 = CountArray_i[j]
+        p2 = ProbArray_T_i[j]
+        prob2 = binom.sf(x2 - 1, ncell, p2)
+        if prob1 <= 0 or prob2 <= 0:
+            val = -10000000.0
+        else:
+            val = ((-(np.log10(prob1))) + (-(np.log10(prob2)))) / 2
+        array[j] = val
     return array
 
 def genMatrix_MultiProcess(Prob_joint, Count_joint, MatType, ngene, ncell, *, ncore=4):
@@ -219,7 +228,7 @@ def main():
     parser.add_argument("--CDIonly", help="Calculate CDI only", action="store_true")
     parser.add_argument("--EEIonly", help="Calculate EEI only", action="store_true")
     parser.add_argument("-p", "--threads", help="number of threads (default: 2)", type=int, default=2)
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.5.0')
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.1')
 
     args = parser.parse_args()
     print(args)
