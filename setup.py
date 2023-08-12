@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="eeisp",
-    version="0.6.0", # for test
+    version="0.6.1", # for test
 #    version="0.5.0",
     license="GPL3.0",
     install_requires=[

@@ -54,7 +54,10 @@ class GraphInfo:
     def __init__(self, ref_graph, graph, partition, weight_key):
         self.graph_whole = nx.Graph()
         self.graph_whole.add_nodes_from(ref_graph.nodes(data=True))
-        self.graph_whole.add_edges_from(graph.edges(data=True))
+#        self.graph_whole.add_edges_from(graph.edges(data=True))
+        for u, v, data in graph.edges(data=True):
+            if u in self.graph_whole.nodes() and v in self.graph_whole.nodes():
+                self.graph_whole.add_edge(u, v, **data)
 
         self.weight_key = weight_key
         self.node_degrees = dict()
@@ -63,8 +66,8 @@ class GraphInfo:
         self.community_degrees = dict()
         self.community_sizes = dict()
 
-        for node in graph.nodes():
-            node_degree = float(graph.degree(node, weight=weight_key))
+        for node in self.graph_whole.nodes():
+            node_degree = float(self.graph_whole.degree(node, weight=weight_key))
             self.node_degrees[node] = node_degree
             loop_edge = graph.get_edge_data(node, node, default={weight_key: 0.})
             self.loops[node] = float(loop_edge.get(weight_key))
@@ -118,7 +121,7 @@ class GraphInfo:
         ki = self.node_degrees.get(node, 0.)
         ac2m = self.community_degrees.get(community, 0.)
         m = self.size
-        linksum = linksum_dict.get(community, 0.)
+        linksum = linksum_dict.get(community, 0.)  # linksum_dictにはそのnodeのエッジ重みの和が格納されている
         result = - linksum + ac2m*ki/(2*m) - ki**2/(2*m)
         return result
 
@@ -131,7 +134,7 @@ class GraphInfo:
         return result
 
 class LouvainSigned:
-    def __init__(self, positive_graph, negative_graph, alpha, random_generator = np.random.default_rng(), seed=None):
+    def __init__(self, positive_graph, negative_graph, alpha, random_generator = np.random.default_rng(), seed=None, mode="positive"):
         if not isinstance(alpha, (int, float)):
             print("Error: Alpha value must be a number. Please provide a valid value.")
             return
@@ -144,7 +147,8 @@ class LouvainSigned:
             self.random_generator = np.random.default_rng(seed=seed)
         else:
             self.random_generator = random_generator
-        self.graph_whole = self.get_signed_graph(positive_graph, negative_graph)
+        self.graph_whole = self.get_signed_graph(positive_graph, negative_graph, mode)
+
         self.partition = {node: i for i, node in enumerate(self.graph_whole.nodes())}
 #        print(self.partition)
 
@@ -153,11 +157,18 @@ class LouvainSigned:
 
         self.dendrogram = list()
         self.alpha = alpha
+        self.mode = mode
 
-    def get_signed_graph(self, positive_graph, negative_graph):
+    def get_signed_graph(self, positive_graph, negative_graph, mode):
         graph = nx.Graph()
-        graph.add_nodes_from(positive_graph.nodes(data=True))
-        graph.add_nodes_from(negative_graph.nodes(data=True))
+        if mode == "Full":
+            graph.add_nodes_from(positive_graph.nodes(data=True))
+            graph.add_nodes_from(negative_graph.nodes(data=True))
+            # graph.add_edges_from(positive_graph.edges(data=True), sign='positive')
+            # graph.add_edges_from(negative_graph.edges(data=True), sign='negative')
+        else:
+            graph.add_nodes_from(positive_graph.nodes(data=True))
+
         return graph
 
     def _randomize(self, items):
@@ -169,6 +180,7 @@ class LouvainSigned:
         alpha = self.alpha
         Q_pos = self.ginfo_pos.calc_modularity(partition)
         Q_neg = self.ginfo_neg.calc_modularity(partition)
+#        print ("Q_pos, Q_neg", Q_pos, Q_neg, alpha * Q_pos + (1-alpha) * (1 - Q_neg))
         return alpha * Q_pos + (1-alpha) * (1 - Q_neg)
 
     def _move_nodes(self):
@@ -199,6 +211,7 @@ class LouvainSigned:
                     q2_neg = self.ginfo_neg._delta_q_2(node, linksum_dict_neg, neighboring_community)
 
                     delta_Q = alpha * (q1_pos + q2_pos) - (1 - alpha) * (1 - q1_neg - q2_neg)
+#                    print ("deltaQ", neighboring_community, delta_Q)
                     if delta_Q > best_increase:
                         best_increase = delta_Q
                         best_community = neighboring_community
@@ -206,7 +219,7 @@ class LouvainSigned:
                 self.ginfo_pos._insert_node(node, self.partition, linksum_dict_pos, best_community)
                 self.ginfo_neg._insert_node(node, self.partition, linksum_dict_neg, best_community)
                 self.partition[node] = best_community
-#                print ("best_community: ", best_community)
+#                print ("best com", best_community)
                 if best_community != original_community:
                     modified = True
 
@@ -227,7 +240,7 @@ class LouvainSigned:
             aggregated_graph.add_edge(c1, c2, **{weight: w_prec + edge_weight})
         return aggregated_graph
 
-    def generate_dendrogram(self):
+    def generate_dendrogram(self, mode):
         current_graph_pos = self.ginfo_pos.graph_whole.copy()
         current_graph_neg = self.ginfo_neg.graph_whole.copy()
         partition_list = list()
@@ -239,7 +252,7 @@ class LouvainSigned:
             partition_list.append(renumberd_partition)
             current_graph_pos = self._aggregate_nodes(renumberd_partition, current_graph_pos)
             current_graph_neg = self._aggregate_nodes(renumberd_partition, current_graph_neg)
-            self.graph_whole = self.get_signed_graph(current_graph_pos, current_graph_neg)
+            self.graph_whole = self.get_signed_graph(current_graph_pos, current_graph_neg, mode)
 
             self.partition = {node: i for i, node in enumerate(self.graph_whole.nodes())}
             self.ginfo_pos = GraphInfo(self.graph_whole, current_graph_pos, self.partition, self.weight_key)
@@ -253,13 +266,12 @@ class LouvainSigned:
         self.dendrogram = partition_list[:]
 
     def best_partition(self):
-        self.generate_dendrogram()
+        self.generate_dendrogram(self.mode)
         partition = self.dendrogram[0].copy()
         for level in range(1, len(self.dendrogram)):
             for node, community in partition.items():
                 partition[node] = self.dendrogram[level][community]
         return partition
-
 
 def main():
     parser = argparse.ArgumentParser(prog='eeisp')
@@ -267,7 +279,7 @@ def main():
     parser.add_argument("output", help="Output prefix", type=str)
     parser.add_argument("--alpha", help="alpha parameter (from 0 to 1, default: 0.5)", type=float, default=0.5)
     parser.add_argument("--seed", help="seed for randamization", type=int)
-    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.4.1')
+    parser.add_argument("-v", "--version", action='version', version='%(prog)s 0.6.0')
 
     args = parser.parse_args()
     print(args)
@@ -280,7 +292,7 @@ def main():
     p1 = 0.05
     p2 = 0.05
 
-    G_positive, G_negative = generate_network(community_size, num_communities, intra_edges, inter_edges, p1, p2, seed)
+    G_positive, G_negative = generate_network(community_size, num_communities, intra_edges, inter_edges, p1, p2)
 
     print(f"G_positive: Nodes={G_positive.number_of_nodes()}, Edges={G_positive.number_of_edges()}")
     print(f"G_negative: Nodes={G_negative.number_of_nodes()}, Edges={G_negative.number_of_edges()}")
